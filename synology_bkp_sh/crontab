@@ -1,0 +1,13 @@
+#put into /etc/crontab without overwriting, add these strings
+0       0       1       *       *       root    /usr/syno/bin/syno_disk_health_record
+*/1     *       *       *       *       root    /scripts/99-sharecheck.sh
+30      0      *       *       *       root    /scripts/01-precopy.sh
+#30     8       *       *       *       root    /scripts/01-precopy.sh
+0       9      *       *       1-5     root    /scripts/04-diffcopy.sh
+0       14      *       *       1-5     root    /scripts/04-diffcopy.sh
+0       19      *       *       1-5     root    /scripts/04-diffcopy.sh
+0       23      *       *       1-5     root    /scripts/04-diffcopy.sh
+0       0       11      *       *       root    /usr/syno/bin/synoschedtask --run id=1
+10      0       *       *       0,3     root    /usr/syno/bin/synoschedtask --run id=2
+0,30    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23   *       *       *       root    /usr/syno/bin/synoschedtask --run id=3
+*       *       *       *       *       root    if (nmap -p 443 vp4.9958258.ru | grep open); then echo '1' > /volume2/logs/vp4; else echo '0' > /volume2/logs/vp4; fi
