@@ -1,0 +1,45 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+  - name: install midnight
+    apt: name=mc state=present
+  - name: install rabbitmq
+    apt: name=rabbitmq-server state=present
+  - name: install python
+    apt: name=python3 state=present
+  - name: install pip3
+    apt: name=pip state=present
+  - name: install pika python module
+    ansible.builtin.pip:
+     name: pika
+  - name: adding nodes to hosts
+    ansible.builtin.shell: cat /tmp/hosts | grep VAGRANT >> /etc/hosts
+    args:
+      executable: /bin/bash
+  - name: stop rabbit
+    command:
+      rabbitmqctl stop_app
+  - name: drop cookie
+    ansible.builtin.file:
+      path: /var/lib/rabbitmq/.erlang.cookie
+      state: absent
+  - name: create cookie
+    lineinfile:
+      path: /var/lib/rabbitmq/.erlang.cookie
+      line: oBeNIun6xMxXIBsBHAxczVtz+Bk+13GaF8MJJRM6nqOZG/NoxBWIOiMN
+      create: yes
+  - name: chmod cokie
+    ansible.builtin.shell: chmod 400 /var/lib/rabbitmq/.erlang.cookie
+    args:
+      executable: /bin/bash
+  - name: join cluster
+    command:
+      rabbitmqctl join_cluster rabbit@rmq2
+  - name: start rabbit
+    command:
+      rabbitmqctl start_app
+  - name: start web interface
+    command:
+      rabbitmq-plugins enable rabbitmq_management

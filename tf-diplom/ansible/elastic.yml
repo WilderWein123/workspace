@@ -1,0 +1,18 @@
+- hosts: elastic
+  remote_user: seregin
+  become: yes
+  tasks:
+  - name: elastic delete unattended-upgrades
+    command:
+      apt purge unattended-upgrades -y
+  - name: uploading elasticsearch
+    copy:
+      src: /tmp/elasticsearch-8.2.2-amd64.deb
+      dest: /tmp
+  - name: installing elasticsearch
+    apt:
+      deb: /tmp/elasticsearch-8.2.2-amd64.deb 
+      state: present
+  - name: install zbx zabbix-agent
+    command:
+      apt install zabbix-agent

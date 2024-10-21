@@ -1,0 +1,48 @@
+- hosts: nginx
+  remote_user: seregin
+  become: yes
+  tasks:
+    - name: update repos
+      command:
+        apt update
+    - name: install nginx
+      command:
+        apt install nginx -y
+    - name: nginx waiting for nginx install by cloudinit
+      shell:
+        cmd: while [ -n $(dpkg -l nginx 2>/dev/null) ]; do sleep 10; done
+    - name: nginx copy config
+      ansible.builtin.template:
+        src: etc/nginx/conf.d/app.conf
+        dest: /etc/nginx/conf.d/app.conf
+    - name: nginx copy content
+      ansible.builtin.template:
+        src: var/www/html/demo-index.html
+        dest: /var/www/html/demo-index.html
+    - name: nginx remove default cfg
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+    - name: nginx restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+    - name: nginx uploading filebeat
+      copy:
+        src: /tmp/filebeat-8.2.2-amd64.deb 
+        dest: /tmp
+    - name: nginx installing filebeat
+      apt:
+        deb: /tmp/filebeat-8.2.2-amd64.deb
+        state: present
+    - name: nginx disable default conf and writing new
+      copy:
+        dest: /etc/filebeat/modules.d/nginx.yml.old
+        content: |
+          - module: nginx
+            access:
+              enabled: true
+        mode: 777
+    - name: install zbx zabbix-agent
+      command:
+        apt install zabbix-agent

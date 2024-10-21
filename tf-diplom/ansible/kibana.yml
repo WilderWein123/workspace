@@ -1,0 +1,18 @@
+- hosts: kibana
+  remote_user: seregin
+  become: yes
+  tasks:
+  - name: kibana delete unattended-upgrades
+    command:
+      apt purge unattended-upgrades -y
+  - name: kibana uploading kibana
+    copy:
+      src: /tmp/kibana-8.2.2-amd64.deb 
+      dest: /tmp
+  - name: kibana installing elasticsearch
+    apt:
+      deb: /tmp/kibana-8.2.2-amd64.deb 
+      state: present
+  - name: install zbx zabbix-agent
+    command:
+      apt install zabbix-agent

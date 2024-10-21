@@ -1,0 +1,24 @@
+- hosts: zabbix
+  remote_user: seregin
+  become: yes
+  tasks:
+  - name: copy script
+    copy:
+      src: ../ansible/zabbix.sh
+      dest: /tmp/zabbix.sh
+  - name: start script
+    command:
+      bash /tmp/zabbix.sh
+  - name: edit zbx server config
+    command:
+      echo DBPassword=MegaSecuredPWD123 >> /etc/zabbix/zabbix_server.conf
+  - name: zabbix apply config changes
+    command:
+      /etc/init.d/zabbix-server restart
+  - name: zabbix restart apache
+    command:
+      /etc/init.d/apache2 restart
+  - name: install zbx zabbix-agent
+    command:
+      apt install zabbix-agent
+
